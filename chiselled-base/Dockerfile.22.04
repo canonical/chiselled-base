@@ -3,7 +3,7 @@ ARG USER=ubuntu UID=101 GROUP=ubuntu GID=101
 
 FROM golang:1.18 AS chisel
 ARG UBUNTU_RELEASE
-RUN git clone -b ubuntu-$UBUNTU_RELEASE https://github.com/cjdcordeiro/chisel-releases /opt/chisel-releases \
+RUN git clone -b ubuntu-${UBUNTU_RELEASE}_2 https://github.com/cjdcordeiro/chisel-releases /opt/chisel-releases \
     && git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
