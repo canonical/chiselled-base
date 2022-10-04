@@ -1,0 +1,5 @@
+name: chiselled-base
+version: 0.0.1
+base: 22.04
+platforms:
+  amd64:
