@@ -1,0 +1,45 @@
+ARG UBUNTU_RELEASE=22.04
+ARG USER=ubuntu UID=101 GROUP=ubuntu GID=101
+
+FROM golang:1.18 AS chisel
+ARG UBUNTU_RELEASE
+RUN git clone -b ubuntu-${UBUNTU_RELEASE}_2 https://github.com/cjdcordeiro/chisel-releases /opt/chisel-releases \
+    && git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
+WORKDIR /opt/chisel
+RUN go generate internal/deb/version.go \
+    && go build ./cmd/chisel
+
+FROM ubuntu:$UBUNTU_RELEASE AS builder
+SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=chisel /opt/chisel/chisel /usr/bin/
+
+FROM builder AS rootfs-prep
+ARG USER UID GROUP GID
+RUN mkdir -p /rootfs/etc \
+    && echo "$GROUP:x:$GID:" >/rootfs/etc/group \
+    && echo "$USER:x:$UID:$GID::/nohome:/noshell" >/rootfs/etc/passwd
+
+FROM scratch AS image-prep
+ARG UID GID
+USER $UID:$GID
+
+### BOILERPLATE END ###
+
+FROM rootfs-prep AS sliced-deps
+COPY --from=chisel /opt/chisel-releases /opt/chisel-releases
+RUN chisel cut --release /opt/chisel-releases --root /rootfs \
+    base-files_base \
+    base-files_release-info \
+    tzdata_zoneinfo \
+    ca-certificates_data \
+    libc-bin_nsswitch \
+    libc6_libs \
+    libssl3_libs \
+    openssl_config
+
+FROM image-prep
+COPY --from=sliced-deps /rootfs /
