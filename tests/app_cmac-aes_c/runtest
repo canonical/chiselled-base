@@ -3,6 +3,12 @@ set -ex
 
 echo "Running test AES CMAC for the chiselled-base-ssl image"
 
-gcc src/test_cmac.c -o app -lcrypto -Wdeprecated-declarations
+compile_c src/test_cmac.c "-lcrypto -Wdeprecated-declarations"
 
 run_container $BASE_SSL_IMAGE
+
+if run_container $BASE_IMAGE; then
+	exit 1
+fi
+
+exit 0

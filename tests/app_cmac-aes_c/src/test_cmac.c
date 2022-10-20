@@ -1,6 +1,9 @@
 /*
     Simple test program for libcrypto (OpenSSL) CMAC
     gcc test_cmac.c -lcrypto
+
+	What CMAC is:
+		https://en.wikipedia.org/wiki/CMAC
 */
 
 #include <stdio.h>
@@ -11,24 +14,91 @@
 
 #define _(x) assert((x))
 
+/*
+	Generate CMAC for a given key and message of a certain length.
+
+	@param key:		secret key which is used to generate the cmac for the message (@param data)
+	@parma data:	the message itself which needs to be tagged i.e. generated a CMAC for
+	@param len:		length of the message (@param data) in bytes
+	@param out:		the tag/CMAC itself as the output
+	@param poutlen:	the length of the CMAC (@param out) in bytes
+*/
 void generate_cmac(unsigned char* key, unsigned char* data, size_t len, unsigned char* out, size_t *poutlen) {
+	/*
+	 	CMAC_CTX * CMAC_CTX_new(void);
+
+		Allocates a new CMAC_CTX object, initializes the embedded 
+		EVP_CIPHER_CTX object, and marks the object itself as uninitialized.
+	*/
     CMAC_CTX *ctx = CMAC_CTX_new();
     _(ctx);
 
+	/*
+		int CMAC_Init(CMAC_CTX *ctx, const void *key, size_t key_len, const EVP_CIPHER *cipher, ENGINE *impl);
+
+		Selects the given block cipher for use by ctx. Functions to obtain 
+		suitable EVP_CIPHER objects are listed in the CIPHER LISTING section 
+		of the EVP_Cipher(3) manual page. Unless key is NULL, CMAC_Init() 
+		also initializes ctx for use with the given symmetric key that is 
+		key_len bytes long. In particular, it calculates and internally stores 
+		the two subkeys and initializes ctx for subsequently feeding in data 
+		with CMAC_Update(). To use the default cipher implementations provided 
+		by the library, pass NULL as the impl argument.
+	*/
     _(CMAC_Init(ctx, key, 32, EVP_aes_256_cbc(), 0));
+
+	/*
+		int CMAC_Update(CMAC_CTX *ctx, const void *in_data, size_t in_len);
+
+		Processes in_len bytes of input data pointed to by in_data. Depending 
+		on the number of input bytes already cached in ctx, on in_len, and on
+		the block size, this may encrypt zero or more blocks. Unless in_len 
+		is zero, this function leaves at least one byte and at most one block
+		of input cached but unprocessed inside the ctx object.
+	*/
     _(CMAC_Update(ctx, data, len));
 
+	/*
+		int CMAC_Final(CMAC_CTX *ctx, unsigned char *out_mac, size_t *out_len);
+
+		Stores the length of the message authentication code in bytes, 
+		which equals the cipher block size, into *out_len. Unless out_mac
+		is NULL, it encrypts the last block, padding it if required, and
+		copies the resulting message authentication code to out_mac. The
+		caller is responsible for providing a buffer of sufficient size.
+	*/
     _(CMAC_Final(ctx, out, poutlen));
 
+	/*
+		void CMAC_CTX_free(CMAC_CTX *ctx);
+
+		Zeros out both subkeys and all temporary data in ctx and in the
+		embedded EVP_CIPHER_CTX object, frees all allocated memory
+		associated with it, except for ctx itself, and marks it as
+		uninitialized, such that it can be reused for subsequent CMAC_Init().
+		Then frees ctx itself. If ctx is NULL, no action occurs.
+	*/
     CMAC_CTX_free(ctx);
 }
 
+/*
+	Compare equality for two byte arrays of a certain length.
+
+	@param res:		byte array 1, the resultant array
+	@param exp:		byte array 2, the expected array
+*/
 void validate_result(unsigned char* res, unsigned char* exp, size_t len) {
     for (int i = 0; i < len; i++) {
         _(res[i] == exp[i]);
     }
 }
 
+/*
+	Print a byte array of a certain length in hex format
+	
+	@param buf:		byte array
+	@param len:		length
+*/
 void print_bytes(unsigned char *buf, size_t len) {
     for (int i = 0; i < len; i++) {
         printf("%02x ", buf[i]);

@@ -1,4 +1,4 @@
-name: cla-check
+name: "Canonical CLA Check"
 
 on:
   pull_request:

@@ -1,4 +1,4 @@
-name: "Ubuntu chiselled-base Tests"
+name: "Ubuntu 'chiselled-base' Tests"
 
 on: push
 

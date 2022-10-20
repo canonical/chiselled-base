@@ -7,15 +7,15 @@ export BASE_IMAGE=${1:-"ubuntu/chiselled-base:test"}
 export BASE_SSL_IMAGE=${2:-"ubuntu/chiselled-base-ssl:test"}
 
 compile_c() {
-	gcc $1 -o app
+	gcc $1 -o app $2
 }
 
 compile_go() {
-	go build -o app $1
+	go build -o app $2 $1
 }
 
 run_container() {
-	docker run --rm -v $PWD/app:/app:ro $1 /app
+	docker run --rm -v $PWD/app:/app:ro $2 $1 /app
 }
 
 export -f compile_c
