@@ -1,0 +1,8 @@
+#!/bin/bash
+set -ex
+
+echo "Running test AES CMAC for the chiselled-base-ssl image"
+
+gcc src/test_cmac.c -o app -lcrypto -Wdeprecated-declarations
+
+run_container $BASE_SSL_IMAGE
