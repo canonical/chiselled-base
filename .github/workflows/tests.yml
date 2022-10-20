@@ -1,0 +1,47 @@
+name: "Ubuntu chiselled-base Tests"
+
+on: push
+
+env:
+  base-name: ubuntu/chiselled-base:test
+  base-ssl-name: ubuntu/chiselled-base-ssl:test
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    name: Build and Test
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu-release: ["22.04"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+      
+      - name: Prepare the runner
+        run: |
+          sudo apt update -y
+          sudo apt install libwww-perl -y
+
+      - name: Build the chiselled-base image
+        run: |
+          docker build \
+          -t ${{ env.base-name }} \
+          -f chiselled-base/Dockerfile.${{ matrix.ubuntu-release }} \
+          chiselled-base
+
+      - name: Build the chiselled-base-ssl image
+        run: |
+          docker build \
+          -t ${{ env.base-ssl-name }} \
+          -f chiselled-base-ssl/Dockerfile.${{ matrix.ubuntu-release }} \
+          chiselled-base-ssl
+
+      - name: Run Tests
+        working-directory: ${{ github.workspace }}/tests/
+        run: |
+          ./run-all-tests ${{ env.base-name }} ${{ env.base-ssl-name }}
