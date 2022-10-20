@@ -1,0 +1,9 @@
+#!/bin/bash
+set -ex
+
+echo "Running test for Go HTTPS GET app"
+
+compile_go src/https.go
+
+run_container $BASE_IMAGE
+run_container $BASE_SSL_IMAGE
