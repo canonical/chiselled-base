@@ -1,0 +1,37 @@
+#!/bin/bash
+set -ex
+
+echo "Running tests for a Simple Web Server on Golang"
+
+test_requests() {
+	container_id=$(docker run -d --rm -v $PWD/app:/app:ro -p 8765:8000 $1 /app)
+	ret_val=0
+
+	resp="$(GET 127.0.0.1:8765/World!)"
+	expected="Hello World!"
+	if [[ $resp != $expected ]]; then
+		ret_val=1
+	fi
+
+	resp="$(GET 127.0.0.1:8765/hello)"
+	expected="Hello"
+	if [[ $resp != $expected ]]; then
+		ret_val=1
+	fi
+
+	resp="$(GET 127.0.0.1:8765)"
+	expected="Hello "
+	if [[ $resp != $expected ]]; then
+		ret_val=1
+	fi
+
+	docker logs $container_id
+	docker stop $container_id
+
+	return $ret_val
+}
+
+compile_go src/server.go
+
+test_requests $BASE_IMAGE
+test_requests $BASE_SSL_IMAGE
