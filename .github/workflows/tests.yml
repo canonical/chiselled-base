@@ -45,3 +45,37 @@ jobs:
         working-directory: ${{ github.workspace }}/tests/
         run: |
           ./run-all-tests ${{ env.base-name }} ${{ env.base-ssl-name }}
+
+  multi-arch-build:
+    runs-on: ubuntu-22.04
+    name: Multi Architecture Build
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu-release: ["22.04"]
+        arch: ["amd64", "arm", "arm64", "s390x", "ppc64le"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build the chiselled-base image
+        run: |
+          docker buildx build \
+          --tag=${{ env.base-name }} \
+          --file=chiselled-base/Dockerfile.${{ matrix.ubuntu-release }} \
+          --platform=linux/${{ matrix.arch }} \
+          chiselled-base
+
+      - name: Build the chiselled-base-ssl image
+        run: |
+          docker buildx build \
+          --tag=${{ env.base-ssl-name }} \
+          --file=chiselled-base-ssl/Dockerfile.${{ matrix.ubuntu-release }} \
+          --platform=linux/${{ matrix.arch }} \
+          chiselled-base-ssl
