@@ -21,6 +21,12 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18'
+
+      - name: Install Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
       
       - name: Prepare the runner
         run: |

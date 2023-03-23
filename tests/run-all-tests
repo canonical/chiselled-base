@@ -14,12 +14,19 @@ compile_go() {
 	go build -o app $2 $1
 }
 
+compile_rust() {
+	RUSTFLAGS='-C target-feature=+crt-static' cargo build
+	cp ./target/debug/app .
+	cargo clean
+}
+
 run_container() {
 	docker run --rm -v $PWD/app:/app:ro $2 $1 /app
 }
 
 export -f compile_c
 export -f compile_go
+export -f compile_rust
 export -f run_container
 
 CURRENT_DIR="$(dirname $(readlink -f $0))"
