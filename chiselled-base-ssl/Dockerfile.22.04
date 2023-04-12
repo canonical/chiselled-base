@@ -37,6 +37,7 @@ RUN chisel cut --release /opt/chisel-releases --root /rootfs \
     tzdata_zoneinfo \
     ca-certificates_data \
     libc-bin_nsswitch \
+    libgcc-s1_libs \
     libc6_libs \
     libssl3_libs \
     openssl_config
