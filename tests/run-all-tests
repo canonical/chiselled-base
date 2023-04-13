@@ -15,7 +15,7 @@ compile_go() {
 }
 
 compile_rust() {
-	RUSTFLAGS='-C target-feature=+crt-static' cargo build
+	cargo build
 	cp ./target/debug/app .
 	cargo clean
 }
