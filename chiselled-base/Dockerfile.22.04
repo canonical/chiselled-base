@@ -1,18 +1,17 @@
 ARG UBUNTU_RELEASE=22.04
 ARG USER=ubuntu UID=101 GROUP=ubuntu GID=101
+ARG CHISEL_VERSION=0.9.1
 
 FROM ubuntu:$UBUNTU_RELEASE AS builder
-ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE
+ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE CHISEL_VERSION
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-ADD "https://github.com/canonical/chisel/releases/download/v0.8.0/chisel_v0.8.0_linux_${TARGETARCH}.tar.gz" chisel.tar.gz
+ADD "https://github.com/canonical/chisel/releases/download/v${CHISEL_VERSION}/chisel_v${CHISEL_VERSION}_linux_${TARGETARCH}.tar.gz" chisel.tar.gz
 RUN tar -xvf chisel.tar.gz -C /usr/bin/
-# TODO: remove this branch once the libc-bin_nsswitch slice is merged
-RUN git clone -b ubuntu-${UBUNTU_RELEASE}_2 https://github.com/cjdcordeiro/chisel-releases /opt/chisel-releases
 
 RUN mkdir -p /rootfs/etc \
     && echo "$GROUP:x:$GID:" >/rootfs/etc/group \
@@ -20,7 +19,7 @@ RUN mkdir -p /rootfs/etc \
 
 ### BOILERPLATE END ###
 
-RUN chisel cut --release /opt/chisel-releases --root /rootfs \
+RUN chisel cut --root /rootfs \
     base-files_base \
     base-files_release-info \
     tzdata_zoneinfo \
