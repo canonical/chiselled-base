@@ -20,7 +20,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.18'
+          go-version: '1.24'
 
       - name: Install Rust Toolchain
         uses: actions-rs/toolchain@v1
