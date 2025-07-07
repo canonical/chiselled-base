@@ -1,5 +1,0 @@
-name: chiselled-base-ssl
-version: 0.0.1
-base: 22.04
-platforms:
-  amd64:

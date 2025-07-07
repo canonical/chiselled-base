@@ -1,0 +1,29 @@
+name: chiseled-base
+# see https://documentation.ubuntu.com/rockcraft/en/1.12.0/explanation/bases/
+# for more information about bases and using 'bare' bases for chiselled rocks
+base: bare
+build-base: ubuntu@24.04 # the base environment for this rock
+version: "24.04" # just for humans. Semantic versioning is recommended
+summary: Chiseled runtime for compiled applications
+description: |
+    This rock provides a minimal runtime environment for compiled applications
+    such as C, C++, Go and Rust programs.
+platforms: # the platforms this rock should be built on and run on
+    amd64:
+
+run-user: _daemon_
+
+parts:
+    base-libs:
+        plugin: nil
+        stage-packages:
+            - base-files_base
+            - base-files_release-info
+            - base-files_chisel
+            - tzdata_zoneinfo
+            - ca-certificates_data
+            - libc-bin_nsswitch
+            - libgcc-s1_libs
+            - libc6_libs
+            - libssl3t64_libs
+            - openssl_config
